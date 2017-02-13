@@ -23,7 +23,8 @@ export default class MyPlugin {
                 //div.innerHTML = JSON.stringify(data);
                 //div.innerHTML = MyPlugin.buildTableHeader();
                 MyPlugin.buildTable(div, data);
-
+                console.log(data);
+                //console.log(JSON.stringify(data));
                 parent.appendChild(div);
             },
             dataType: 'json'
@@ -42,6 +43,7 @@ export default class MyPlugin {
         btnBuy.addEventListener('click', e => {
             window.open("/tmg/dwsp?seriesuid=" + suid, '_blank');
         });
+
         div.appendChild(btnBuy);
 
         parent.appendChild(div);
@@ -52,16 +54,33 @@ export default class MyPlugin {
         tbl.setAttribute('class', 'table table-hover table-bordered table-condensed');
         tbl.setAttribute('border', '1');
 
+        var headers = ['ID', 'Name', 'Date', 'Description', 'Institution', ''];
+
+        var patientHeaders = ['PatientID', 'PatientName', 'Gender'];
+        var studyHeaders = ['Date', 'Description', 'Institution'];
+        var seriesHeaders = ['Description', '#Images', ''];
+
+        MyPlugin.buildHeader(tbl, headers);
+
+        headers = ['PatientID', 'PatientName', 'StudyDate', 'StudyDescription', 'InstitutionName'];
+
+        MyPlugin.buildBody(tbl, headers, data);
+
+
+
+        divParent.appendChild(tbl)
+    }
+
+    static buildHeader(parent, headersData) {
         var thead = document.createElement('thead');
         var tr = document.createElement('tr');
 
-        var headers = ['ID', 'Name', 'Date', 'Description', 'Institution', ''];
 
-        for (var x in headers) {
+        for (var x in headersData) {
             var th = document.createElement('th');
             th.setAttribute('class', 'sort-column');
 
-            if (headers[x] == '') {
+            if (headersData[x] == '') {
                 th.setAttribute('style', 'align:center; width:30px; max-width:30px;');
             }
 
@@ -70,7 +89,7 @@ export default class MyPlugin {
             thdiv.setAttribute('class', 'th-inner table-header-column');
             thdiv.setAttribute('data-field', x.toLowerCase());
             thdiv.setAttribute('style', 'margin:10px 5px;');
-            thdiv.innerHTML = headers[x];
+            thdiv.innerHTML = headersData[x];
 
             th.appendChild(thdiv)
             tr.appendChild(th);
@@ -78,35 +97,29 @@ export default class MyPlugin {
             thead.appendChild(th);
         }
 
-        tbl.appendChild(thead);
+        parent.appendChild(thead);
+    }
 
-
+    static buildBody(parent, ids, data) {
         var tbdy = document.createElement('tbody');
-
-
-        headers = ['PatientID', 'PatientName', 'StudyDate', 'StudyDescription', 'InstitutionName'];
-
         var series = new Array();
 
         for (var item in data.results) {
-            if (series.includes(data.results[item].fields['SeriesInstanceUID'])) {//($.inArray(data.results[item].fields['SeriesInstanceUID'], series)) {
-                console.log('continue');
+            if (series.includes(data.results[item].fields['SeriesInstanceUID'])) {
                 continue;
             } else {
                 series.push(data.results[item].fields['SeriesInstanceUID']);
-                console.log('push');
             }
 
-            //console.log(data.results[item].fields);
             var tr = document.createElement('tr');
 
-            for (var x in headers) {
+            for (var x in ids) {
                 var td = document.createElement('td');
                 td.setAttribute('style', 'align:left');
 
                 var tdDiv = document.createElement('div');
                 tdDiv.setAttribute('style', 'cursor:pointer');
-                tdDiv.innerHTML = data.results[item].fields[headers[x]];
+                tdDiv.innerHTML = data.results[item].fields[ids[x]];
                 td.appendChild(tdDiv);
                 tr.appendChild(td);
             }
@@ -120,9 +133,6 @@ export default class MyPlugin {
         }
 
 
-        tbl.appendChild(tbdy);
-
-        divParent.appendChild(tbl)
-
+        parent.appendChild(tbdy);
     }
 }
